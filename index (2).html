@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Miqnas ERP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f5; --card:#ffffff; --ink:#14201f; --muted:#5f6d6b; --line:#e2e8e6;
+  --brand:#0f3d3e; --brand2:#1b5e5f; --accent:#e8a33d;
+  --ok:#1f8a4c; --okbg:#e6f4ec; --bad:#c0392b; --badbg:#fbeaea; --warn:#b7791f; --warnbg:#fdf3e1;
+  --r:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;font-size:15px}
+button,input,select{font:inherit}
+.hidden{display:none!important}
+
+/* login */
+.login-wrap{min-height:100vh;display:grid;place-items:center;padding:16px;background:linear-gradient(160deg,var(--brand) 0%,#0a2a2b 100%)}
+.login{background:var(--card);border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.logo{font-weight:700;font-size:24px;color:var(--brand);letter-spacing:.5px}
+.logo span{color:var(--accent)}
+.login p{color:var(--muted);margin:6px 0 22px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--brand2);border-color:transparent}
+.btn{border:0;border-radius:10px;padding:11px 18px;cursor:pointer;font-weight:600;background:var(--brand);color:#fff}
+.btn:hover{background:var(--brand2)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line)}
+.btn.ghost:hover{background:#eef3f2}
+.btn.small{padding:7px 12px;font-size:13px}
+.btn.full{width:100%;margin-top:20px}
+.err{color:var(--bad);font-size:13px;min-height:18px;margin-top:10px}
+
+/* app */
+header{background:var(--brand);color:#fff;position:sticky;top:0;z-index:5}
+.hbar{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+header .logo{color:#fff;font-size:20px}
+.spacer{flex:1}
+.who{font-size:14px;text-align:left;line-height:1.3}
+.who small{opacity:.75;display:block}
+.hbtn{background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:9px;padding:7px 11px;cursor:pointer;font-size:13px}
+.hbtn:hover{background:rgba(255,255,255,.22)}
+nav{max-width:1200px;margin:0 auto;padding:0 12px;display:flex;gap:4px;overflow-x:auto}
+nav button{background:none;border:0;color:rgba(255,255,255,.72);padding:10px 12px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;font-weight:500}
+nav button.on{color:#fff;border-bottom-color:var(--accent)}
+nav button.soon{opacity:.45;cursor:default}
+nav button.soon:after{content:" · قريباً";font-size:11px}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+h2{font-size:19px;margin:0 0 14px}
+h3{font-size:16px;margin:0 0 10px}
+.muted{color:var(--muted)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.row>div{flex:1;min-width:150px}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.kpi b{display:block;font-size:26px;color:var(--brand)}
+.kpi span{color:var(--muted);font-size:13px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);font-size:14px;white-space:nowrap}
+th{background:#f0f4f3;color:var(--muted);font-weight:600;font-size:13px}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.p-in{background:var(--okbg);color:var(--ok)}
+.p-out{background:#eef1f0;color:var(--muted)}
+.p-absent{background:var(--warnbg);color:var(--warn)}
+.p-bad{background:var(--badbg);color:var(--bad)}
+
+/* clock */
+.clock{max-width:560px;margin:0 auto;text-align:center;padding:30px 22px}
+.big-time{font-size:46px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums;margin:8px 0}
+.state{font-size:15px;margin-bottom:6px}
+.clock .btn{font-size:18px;padding:15px 34px;margin-top:16px;border-radius:14px}
+.btn.out{background:var(--bad)}
+.btn.out:hover{background:#a5301f}
+.share-ok{margin-top:16px;padding:10px 14px;border-radius:10px;background:var(--okbg);color:var(--ok);font-size:14px}
+.notice{margin-top:16px;padding:12px 14px;border-radius:10px;background:#f0f4f3;color:var(--muted);font-size:13px;text-align:right;line-height:1.8}
+.alarm{position:fixed;inset:0;background:rgba(15,25,25,.78);z-index:50;display:grid;place-items:center;padding:16px}
+.alarm .card{max-width:440px;text-align:center;border-top:5px solid var(--bad)}
+.alarm h2{color:var(--bad)}
+
+/* shots */
+.shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:14px}
+.shot{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer}
+.shot img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:#dde4e2}
+.shot div{padding:7px 10px;font-size:13px;display:flex;justify-content:space-between;color:var(--muted)}
+.events{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ev{font-size:12px;padding:4px 10px;border-radius:99px;background:#f0f4f3}
+.ev.stop{background:var(--badbg);color:var(--bad)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(10,20,20,.6);z-index:40;display:grid;place-items:center;padding:16px}
+.modal .card{width:100%;max-width:460px;max-height:90vh;overflow:auto}
+.modal.img .card{max-width:1100px;padding:10px}
+.modal.img img{width:100%;display:block;border-radius:8px}
+.mfoot{display:flex;gap:8px;justify-content:flex-start;margin-top:18px}
+.check{display:flex;align-items:center;gap:8px;margin-top:14px}
+.check input{width:auto}
+.pw{font-size:22px;font-weight:700;letter-spacing:2px;background:#f0f4f3;border-radius:10px;padding:12px;text-align:center;margin:10px 0;direction:ltr}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;z-index:60;font-size:14px}
+.loading{padding:30px;text-align:center;color:var(--muted)}
+#cap{position:fixed;left:-10000px;top:0;width:2px;height:2px;opacity:0}
+@media (max-width:600px){ .who{display:none} .big-time{font-size:38px} }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView" class="login-wrap hidden">
+  <form class="login" id="loginForm">
+    <div class="logo">Miqnas <span>ERP</span></div>
+    <p>سجّل دخولك باليوزر والباسورد</p>
+    <label>اليوزر</label>
+    <input id="lu" autocomplete="username" dir="ltr" required>
+    <label>الباسورد</label>
+    <input id="lp" type="password" autocomplete="current-password" dir="ltr" required>
+    <button class="btn full" id="lbtn">دخول</button>
+    <div class="err" id="lerr"></div>
+  </form>
+</div>
+
+<!-- APP -->
+<div id="appView" class="hidden">
+  <header>
+    <div class="hbar">
+      <div class="logo">Miqnas <span style="color:var(--accent)">ERP</span></div>
+      <div class="spacer"></div>
+      <div class="who"><span id="uName"></span><small id="uRole"></small></div>
+      <button class="hbtn" onclick="openPw()">الباسورد</button>
+      <button class="hbtn" onclick="logout()">خروج</button>
+    </div>
+    <nav id="nav"></nav>
+  </header>
+  <main id="main"></main>
+</div>
+
+<div id="boot" class="loading">جاري التحميل...</div>
+<video id="cap" muted playsinline></video>
+<div id="modalRoot"></div>
+
+<script>
+/* ============ الإعداد ============ */
+// حط هنا لينك الـ Web App اللي بينتهي بـ /exec (مطلوب لو الصفحة مرفوعة بره جوجل)
+const API_URL = 'https://script.google.com/macros/s/AKfycbwIhxu4UgOVOfSdmEjk1wOYP0MRGFFMCuWq4T6rGy9xi194yiovKC9rqNTpgvcymLCp/exec';
+
+const IN_GAS = typeof google !== 'undefined' && google.script && google.script.run;
+const S = { token:null, user:null, cfg:{shotMinutes:10}, view:null, status:null,
+            stream:null, mode:null, lastShot:0, timer:null, tick:null, pending:[], sharing:false };
+const MODE_NAMES = { tab:'تاب', window:'ويندو', screen:'الشاشة كلها' };
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function store(k,v){ try{ v==null? localStorage.removeItem(k) : localStorage.setItem(k,v);}catch(e){} }
+function load(k){ try{ return localStorage.getItem(k);}catch(e){ return null; } }
+
+/* ============ الاتصال بالسيرفر ============ */
+function call(action, params){
+  params = Object.assign({}, params||{}, {token:S.token});
+  const done = r => {
+    if(r && r.ok) return r.data;
+    if(r && r.error==='AUTH'){ forceLogin(); throw new Error('انتهت الجلسة، سجّل دخول تاني'); }
+    throw new Error((r&&r.error)||'حصل خطأ');
+  };
+  if(IN_GAS){
+    return new Promise((res,rej)=>{
+      google.script.run.withSuccessHandler(r=>{ try{res(done(r));}catch(e){rej(e);} })
+        .withFailureHandler(e=>rej(new Error(e.message||'مشكلة في الاتصال'))).api(action, params);
+    });
+  }
+  if(API_URL.indexOf('http')!==0) return Promise.reject(new Error('لينك السيرفر مش متظبط في الصفحة'));
+  return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action},params))})
+    .then(r=>r.json()).then(done)
+    .catch(e=>{ throw e.message? e : new Error('مشكلة في الاتصال'); });
+}
+
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3200); }
+
+/* ============ اللوجين ============ */
+$('loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  $('lerr').textContent=''; $('lbtn').disabled=true;
+  try{
+    const r = await call('login',{username:$('lu').value,password:$('lp').value});
+    S.token=r.token; store('erp_token',r.token);
+    await boot();
+  }catch(err){ $('lerr').textContent=err.message; }
+  $('lbtn').disabled=false;
+});
+
+function forceLogin(){
+  if(S.sharing) return; // متوقفش الشاشة لو بيبصم، هيدخل تاني من الرسالة
+  S.token=null; store('erp_token',null);
+  $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); $('boot').classList.add('hidden');
+}
+
+async function logout(){
+  if(S.status && S.status.clockedIn && !confirm('انت لسه عامل بصمة دخول. لو خرجت السكرين شوتس هتقف. متأكد؟')) return;
+  try{ await call('logout'); }catch(e){}
+  stopStream(false);
+  S.token=null; store('erp_token',null); location.reload();
+}
+
+async function boot(){
+  $('boot').classList.remove('hidden');
+  try{
+    const r = await call('me');
+    S.user=r.user; S.cfg=r.cfg; S.status=r.status;
+    $('loginView').classList.add('hidden'); $('boot').classList.add('hidden'); $('appView').classList.remove('hidden');
+    $('uName').textContent=S.user.name; $('uRole').textContent=S.user.roleName+(S.user.job?' · '+S.user.job:'');
+    buildNav();
+  }catch(e){
+    $('boot').classList.add('hidden'); $('loginView').classList.remove('hidden');
+  }
+}
+
+/* ============ التنقل ============ */
+function tabsFor(role){
+  const t=[];
+  if(S.user.clocks) t.push(['clock','البصمة']);
+  if(role==='admin'||role==='hr') t.push(['board','النهارده'],['monthly','التقرير الشهري'],['shots','السكرين شوتس'],['users','الموظفين']);
+  if(role==='admin'||role==='am') t.push(['briefs','البريفات',1]);
+  if(role==='admin'||role==='am'||role==='team') t.push(['projects','المشاريع والتاسكات',1]);
+  if(!t.length) t.push(['home','الرئيسية']);
+  return t;
+}
+function buildNav(){
+  const tabs=tabsFor(S.user.role);
+  $('nav').innerHTML=tabs.map(t=>`<button data-v="${t[0]}" class="${t[2]?'soon':''}">${t[1]}</button>`).join('');
+  $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{ if(!b.classList.contains('soon')) go(b.dataset.v); });
+  const first = tabs.find(t=>!t[2]);
+  go(first? first[0] : 'home');
+}
+function go(v){
+  S.view=v;
+  $('nav').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  clearInterval(S.viewTimer);
+  ({clock:viewClock,board:viewBoard,monthly:viewMonthly,shots:viewShots,users:viewUsers,home:viewHome}[v]||viewHome)();
+}
+function viewHome(){
+  $('main').innerHTML=`<div class="card"><h2>أهلاً ${esc(S.user.name)}</h2><p class="muted">البريفات والمشاريع هيتضافوا هنا في المراحل الجاية.</p></div>`;
+}
+
+/* ============ البصمة + مشاركة الشاشة ============ */
+function fmtDur(ms){ ms=Math.max(0,ms); const h=Math.floor(ms/36e5), m=Math.floor(ms%36e5/6e4), s=Math.floor(ms%6e4/1e3); return [h,m,s].map(x=>String(x).padStart(2,'0')).join(':'); }
+
+function viewClock(){
+  const st=S.status||{};
+  const inn=st.clockedIn;
+  $('main').innerHTML=`
+  <div class="card clock">
+    <div class="state">${inn?`<span class="pill p-in">انت شغال دلوقتي</span> <span class="muted">من الساعة ${esc(st.inT)}</span>`:'<span class="pill p-out">مش عامل بصمة</span>'}</div>
+    <div class="big-time" id="elapsed">${inn?'00:00:00':'--:--'}</div>
+    <div class="muted">ساعات النهارده: <b id="todayH">${(st.closedHoursToday||0).toFixed(2)}</b></div>
+    ${inn
+      ? `<button class="btn out" id="outBtn">بصمة خروج</button>
+         <div id="shareBox"></div>`
+      : `<button class="btn" id="inBtn">بصمة دخول</button>`}
+    <div class="notice">
+      • أول ما تدوس بصمة دخول، هيطلعلك شباك تختار منه تشارك: <b>تاب</b> أو <b>ويندو</b> أو <b>الشاشة كلها</b>.<br>
+      • السيستم بياخد سكرين شوت كل ${S.cfg.shotMinutes} دقايق لحد ما تبصم خروج.<br>
+      • خلي الصفحة دي مفتوحة طول الشغل، ولو قفلتها أو وقفت المشاركة هيتسجل.<br>
+      • استخدم <b>كروم</b> أو <b>إيدج</b> على الكمبيوتر.
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>الشهر ده</h3><div id="myMonth" class="loading">جاري التحميل...</div></div>`;
+  if(inn){
+    $('outBtn').onclick=clockOut;
+    renderShareBox();
+    const off = Date.now()-(st.serverNow||Date.now());
+    const tick=()=>{ const el=$('elapsed'); if(el) el.textContent=fmtDur(Date.now()-off-st.inTs); };
+    tick(); S.viewTimer=setInterval(tick,1000);
+    if(!S.sharing) showAlarm(true);
+  } else {
+    $('inBtn').onclick=clockIn;
+  }
+  loadMyMonth();
+}
+
+function renderShareBox(){
+  const b=$('shareBox'); if(!b) return;
+  b.innerHTML = S.sharing
+    ? `<div class="share-ok">✓ المشاركة شغالة (${esc(MODE_NAMES[S.mode]||'')}) · آخر سكرين شوت: <b id="lastShotT">${S.lastShot? new Date(S.lastShot).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}) : '...'}</b></div>`
+    : '';
+}
+
+async function loadMyMonth(){
+  try{
+    const r=await call('myMonth');
+    const s=r.summary||{days:0,hours:0,avg:0,missed:0};
+    $('myMonth').innerHTML=`
+      <div class="grid kpis" style="margin-bottom:12px">
+        <div class="kpi"><b>${s.days}</b><span>أيام حضور</span></div>
+        <div class="kpi"><b>${s.hours}</b><span>إجمالي الساعات</span></div>
+        <div class="kpi"><b>${s.avg}</b><span>متوسط اليوم</span></div>
+      </div>
+      ${r.days.length?`<div class="tbl-wrap"><table style="min-width:420px"><tr><th>التاريخ</th><th>اليوم</th><th>دخول</th><th>خروج</th><th>الساعات</th></tr>
+      ${r.days.slice().reverse().map(d=>`<tr><td>${esc(d.date)}</td><td>${esc(d.day)}</td><td>${esc(d.inT)}</td><td>${d.open?'<span class="pill p-in">شغال</span>':esc(d.outT)}</td><td>${d.open?'—':d.hours}</td></tr>`).join('')}
+      </table></div>`:'<p class="muted">مفيش حضور الشهر ده لسه.</p>'}`;
+  }catch(e){ $('myMonth').textContent=e.message; }
+}
+
+function surfaceToMode(track){
+  const s=(track.getSettings&&track.getSettings().displaySurface)||'';
+  return s==='browser'?'tab': s==='window'?'window': s==='monitor'?'screen':'screen';
+}
+
+async function startShare(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia)
+    throw new Error('المتصفح ده مش بيدعم مشاركة الشاشة. افتح الصفحة من كروم أو إيدج على الكمبيوتر');
+  let stream;
+  try{
+    stream = await navigator.mediaDevices.getDisplayMedia({
+      video:{frameRate:1}, audio:false,
+      selfBrowserSurface:'include', surfaceSwitching:'include', monitorTypeSurfaces:'include'
+    });
+  }catch(e){
+    if(IN_GAS) throw new Error('صفحة جوجل مش بتسمح بمشاركة الشاشة. افتح لينك البصمة الأساسي (اللي على GitHub) وابصم منه');
+    if(e && e.name==='NotAllowedError') throw new Error('لازم توافق على مشاركة الشاشة عشان تقدر تبصم');
+    throw new Error('مشاركة الشاشة مشتغلتش: '+(e.message||e.name));
+  }
+  const track=stream.getVideoTracks()[0];
+  S.stream=stream; S.mode=surfaceToMode(track); S.sharing=true;
+  const v=$('cap'); v.srcObject=stream; try{ await v.play(); }catch(e){}
+  track.onended=onShareEnded;
+  return S.mode;
+}
+
+function stopStream(log){
+  S.sharing=false;
+  clearInterval(S.tick);
+  if(S.stream){ S.stream.getTracks().forEach(t=>{ t.onended=null; t.stop(); }); }
+  S.stream=null;
+  $('cap').srcObject=null;
+}
+
+async function onShareEnded(){
+  stopStream();
+  try{ await call('shareEvent',{event:'stopped'}); }catch(e){}
+  showAlarm(false);
+}
+
+function showAlarm(afterReload){
+  if(!S.status||!S.status.clockedIn) return;
+  if(afterReload && !S.reloadLogged){ S.reloadLogged=true; call('shareEvent',{event:'stopped'}).catch(()=>{}); }
+  closeModal();
+  document.title='⚠ المشاركة واقفة';
+  $('modalRoot').innerHTML=`<div class="alarm"><div class="card">
+    <h2>مشاركة الشاشة واقفة</h2>
+    <p>${afterReload?'الصفحة اتقفلت أو اتعملها ريفريش، فالمشاركة وقفت.':'المشاركة وقفت.'} انت لسه عامل بصمة دخول، ولازم ترجّع المشاركة عشان الشغل يتحسب.</p>
+    <p class="muted" style="font-size:13px">ده متسجل عند الإدارة.</p>
+    <div class="err" id="aerr"></div>
+    <div class="mfoot" style="justify-content:center">
+      <button class="btn" id="resumeBtn">رجّع المشاركة</button>
+      <button class="btn ghost" id="alarmOut">بصمة خروج</button>
+    </div></div></div>`;
+  $('resumeBtn').onclick=async()=>{
+    $('aerr').textContent='';
+    try{
+      const mode=await startShare();
+      await call('shareEvent',{event:'resumed',mode});
+      $('modalRoot').innerHTML=''; document.title='Miqnas ERP';
+      startShotLoop(true);
+      if(S.view==='clock') viewClock();
+    }catch(e){ $('aerr').textContent=e.message; }
+  };
+  $('alarmOut').onclick=()=>{ $('modalRoot').innerHTML=''; document.title='Miqnas ERP'; clockOut(); };
+}
+
+async function clockIn(){
+  const b=$('inBtn'); b.disabled=true; b.textContent='اختار هتشارك إيه...';
+  try{
+    const mode=await startShare();
+    b.textContent='جاري التسجيل...';
+    S.status=await call('clockIn',{mode});
+    toast('اتسجلت بصمة الدخول ✓');
+    startShotLoop(true);
+    viewClock();
+  }catch(e){
+    stopStream();
+    alert(e.message);
+    b.disabled=false; b.textContent='بصمة دخول';
+  }
+}
+
+async function clockOut(){
+  if(!confirm('متأكد إنك عاوز تبصم خروج؟')) return;
+  const b=$('outBtn'); if(b){ b.disabled=true; b.textContent='جاري التسجيل...'; }
+  try{
+    if(S.sharing) await takeShot().catch(()=>{});
+    stopStream();
+    S.status=await call('clockOut');
+    toast('اتسجلت بصمة الخروج ✓');
+    document.title='Miqnas ERP';
+    viewClock();
+  }catch(e){ alert(e.message); if(b){ b.disabled=false; b.textContent='بصمة خروج'; } }
+}
+
+function startShotLoop(now){
+  clearInterval(S.tick);
+  const ms=S.cfg.shotMinutes*60000;
+  if(now) setTimeout(()=>takeShot().catch(()=>{}),2500);
+  S.tick=setInterval(()=>{
+    if(!S.sharing) return;
+    if(S.pending.length) flushPending();
+    if(Date.now()-S.lastShot>=ms) takeShot().catch(()=>{});
+  },20000);
+}
+
+async function grabCanvas(maxW){
+  const track=S.stream&&S.stream.getVideoTracks()[0];
+  if(!track||track.readyState!=='live') throw new Error('no stream');
+  let src=null,w=0,h=0;
+  if('ImageCapture' in window){
+    try{ const bmp=await new ImageCapture(track).grabFrame(); src=bmp; w=bmp.width; h=bmp.height; }catch(e){}
+  }
+  if(!src){ const v=$('cap'); src=v; w=v.videoWidth; h=v.videoHeight; }
+  if(!w||!h) throw new Error('no frame');
+  const out=(mw,q)=>{ const sc=Math.min(1,mw/w); const c=document.createElement('canvas'); c.width=Math.round(w*sc); c.height=Math.round(h*sc); c.getContext('2d').drawImage(src,0,0,c.width,c.height); return c.toDataURL('image/jpeg',q); };
+  return { image: out(maxW,0.6), thumb: out(360,0.5) };
+}
+
+async function takeShot(){
+  if(!S.sharing) return;
+  const shot=await grabCanvas(1600);
+  shot.mode=S.mode;
+  S.lastShot=Date.now();
+  try{ await call('uploadShot',shot); }
+  catch(e){ if(S.pending.length<3) S.pending.push(shot); }
+  const el=$('lastShotT'); if(el) el.textContent=new Date(S.lastShot).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+}
+async function flushPending(){
+  const p=S.pending.splice(0);
+  for(const s of p){ try{ await call('uploadShot',s); }catch(e){ S.pending.push(s); break; } }
+}
+
+window.addEventListener('beforeunload',e=>{
+  if(S.status&&S.status.clockedIn){ e.preventDefault(); e.returnValue=''; }
+});
+
+/* ============ النهارده (HR + أدمن) ============ */
+async function viewBoard(){
+  $('main').innerHTML='<div class="loading">جاري التحميل...</div>';
+  const render=async()=>{
+    try{
+      const r=await call('board');
+      if(S.view!=='board') return;
+      const L=r.list;
+      const inN=L.filter(x=>x.state==='in').length, came=L.filter(x=>x.state!=='absent').length;
+      const alerts=L.filter(x=>x.alert||x.staleOpen).length;
+      $('main').innerHTML=`
+      <div class="row" style="margin-bottom:14px;align-items:center"><h2 style="margin:0">النهارده · ${esc(r.today)}</h2><div class="spacer"></div><span class="muted" style="font-size:13px">آخر تحديث ${esc(r.now)} · بيتحدث لوحده كل دقيقة</span></div>
+      <div class="grid kpis">
+        <div class="kpi"><b>${inN}</b><span>شغالين دلوقتي</span></div>
+        <div class="kpi"><b>${came}</b><span>بصموا النهارده</span></div>
+        <div class="kpi"><b>${L.length-came}</b><span>لسه مبصموش</span></div>
+        <div class="kpi"><b style="color:${alerts?'var(--bad)':'var(--brand)'}">${alerts}</b><span>تنبيهات</span></div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <tr><th>الاسم</th><th>الوظيفة</th><th>الحالة</th><th>دخول</th><th>خروج</th><th>المشاركة</th><th>آخر سكرين شوت</th><th>وقفات</th><th>ساعات النهارده</th><th></th></tr>
+        ${L.map(x=>`<tr>
+          <td><b>${esc(x.name)}</b></td><td class="muted">${esc(x.job)}</td>
+          <td>${x.staleOpen?'<span class="pill p-bad">نسي يبصم خروج</span>':x.alert?'<span class="pill p-bad">مفيش سكرين شوتس</span>':x.state==='in'?'<span class="pill p-in">شغال</span>':x.state==='out'?'<span class="pill p-out">خرج</span>':'<span class="pill p-absent">مبصمش</span>'}</td>
+          <td>${esc(x.inT)||'—'}</td><td>${esc(x.outT)||'—'}</td><td>${esc(x.mode)||'—'}</td>
+          <td>${esc(x.lastShot)||'—'}</td><td>${x.stops?`<span class="pill p-bad">${x.stops}</span>`:'0'}</td><td>${x.hoursToday}</td>
+          <td><button class="btn ghost small" onclick="openShotsFor('${esc(x.username)}','${esc(r.today)}')">الصور</button></td></tr>`).join('')}
+      </table></div>`;
+    }catch(e){ $('main').innerHTML=`<div class="card err">${esc(e.message)}</div>`; }
+  };
+  await render();
+  S.viewTimer=setInterval(()=>{ if(S.view==='board') render(); },60000);
+}
+
+/* ============ التقرير الشهري ============ */
+let monthlyData=null;
+function viewMonthly(){
+  const m=new Date().toISOString().slice(0,7);
+  $('main').innerHTML=`
+  <div class="row" style="margin-bottom:14px">
+    <div><h2 style="margin:0 0 8px">التقرير الشهري</h2><input type="month" id="mSel" value="${m}" style="max-width:220px"></div>
+    <div style="flex:0"><button class="btn ghost" id="csvBtn">تحميل Excel (CSV)</button></div>
+  </div><div id="mBody" class="loading">جاري التحميل...</div>`;
+  $('mSel').onchange=loadMonthly; $('csvBtn').onclick=exportCsv;
+  loadMonthly();
+}
+async function loadMonthly(){
+  $('mBody').innerHTML='<div class="loading">جاري التحميل...</div>';
+  try{
+    const r=await call('monthly',{month:$('mSel').value}); monthlyData=r;
+    const R=r.rows, tot=R.reduce((s,x)=>s+x.hours,0);
+    $('mBody').innerHTML=`
+    <div class="grid kpis">
+      <div class="kpi"><b>${R.length}</b><span>موظف</span></div>
+      <div class="kpi"><b>${Math.round(tot*100)/100}</b><span>إجمالي الساعات</span></div>
+      <div class="kpi"><b style="color:${R.some(x=>x.missed)?'var(--bad)':'var(--brand)'}">${R.reduce((s,x)=>s+x.missed,0)}</b><span>مرات نسيان بصمة الخروج</span></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>الاسم</th><th>الوظيفة</th><th>أيام الحضور</th><th>إجمالي الساعات</th><th>متوسط اليوم</th><th>نسي يبصم خروج</th><th>وقفات المشاركة</th><th>عدد السكرين شوتس</th></tr>
+      ${R.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td class="muted">${esc(x.job)}</td><td>${x.days}</td><td>${x.hours}</td><td>${x.avg}</td>
+        <td>${x.missed?`<span class="pill p-bad">${x.missed}</span>`:'0'}</td><td>${x.stops?`<span class="pill p-bad">${x.stops}</span>`:'0'}</td><td>${x.shots}</td></tr>`).join('')}
+    </table></div>`;
+  }catch(e){ $('mBody').innerHTML=`<div class="card err">${esc(e.message)}</div>`; }
+}
+function exportCsv(){
+  if(!monthlyData) return;
+  const head=['الاسم','الوظيفة','أيام الحضور','إجمالي الساعات','متوسط اليوم','نسي يبصم خروج','وقفات المشاركة','عدد السكرين شوتس'];
+  const lines=[head].concat(monthlyData.rows.map(x=>[x.name,x.job,x.days,x.hours,x.avg,x.missed,x.stops,x.shots]))
+    .map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(','));
+  const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='حضور-'+monthlyData.month+'.csv'; a.click();
+}
+
+/* ============ السكرين شوتس ============ */
+let usersCache=null;
+async function getUsers(){ if(!usersCache) usersCache=await call('users'); return usersCache; }
+function openShotsFor(u,d){ S.shotsPre={u,d}; go('shots'); }
+async function viewShots(){
+  const pre=S.shotsPre||{}; S.shotsPre=null;
+  $('main').innerHTML='<div class="loading">جاري التحميل...</div>';
+  try{
+    const users=(await getUsers()).filter(u=>u.clocks);
+    const today=new Date().toLocaleDateString('en-CA',{timeZone:'Africa/Cairo'});
+    $('main').innerHTML=`
+    <h2>السكرين شوتس</h2>
+    <div class="row">
+      <div><label>الموظف</label><select id="sU">${users.map(u=>`<option value="${esc(u.username)}" ${u.username===pre.u?'selected':''}>${esc(u.name)}</option>`).join('')}</select></div>
+      <div><label>اليوم</label><input type="date" id="sD" value="${esc(pre.d||today)}"></div>
+      <div style="flex:0"><button class="btn" id="sGo">عرض</button></div>
+    </div>
+    <div id="sBody"></div>`;
+    $('sGo').onclick=loadShots; $('sU').onchange=loadShots; $('sD').onchange=loadShots;
+    loadShots();
+  }catch(e){ $('main').innerHTML=`<div class="card err">${esc(e.message)}</div>`; }
+}
+async function loadShots(){
+  $('sBody').innerHTML='<div class="loading">جاري تحميل الصور...</div>';
+  try{
+    const r=await call('shots',{username:$('sU').value,date:$('sD').value});
+    const att=r.att.map(a=>`دخول ${esc(a.inT)} · خروج ${esc(a.outT)||'لسه شغال'}${a.hours?` · ${a.hours} ساعة`:''}`).join(' | ');
+    $('sBody').innerHTML=`
+      <div class="card" style="margin-top:14px">
+        <div><b>الحضور:</b> <span class="muted">${att||'مفيش بصمة اليوم ده'}</span></div>
+        <div class="events">${r.events.map(e=>`<span class="ev ${/وقف/.test(e.event)?'stop':''}">${esc(e.time)} · ${esc(e.event)}${e.mode?' ('+esc(e.mode)+')':''}</span>`).join('')||'<span class="muted" style="font-size:13px">مفيش أحداث</span>'}</div>
+      </div>
+      ${r.items.length?`<p class="muted" style="margin:14px 0 0">${r.items.length} صورة · دوس على أي صورة تكبرها</p>
+      <div class="shots">${r.items.map(i=>`<div class="shot" onclick="openShot('${esc(i.fileId)}','${esc(i.time)}')">${i.thumb?`<img src="${i.thumb}" alt="">`:'<img alt="">'}<div><b>${esc(i.time)}</b><span>${esc(i.mode)}</span></div></div>`).join('')}</div>`
+      :'<p class="muted" style="margin-top:14px">مفيش سكرين شوتس لليوم ده.</p>'}`;
+  }catch(e){ $('sBody').innerHTML=`<div class="card err" style="margin-top:14px">${esc(e.message)}</div>`; }
+}
+async function openShot(id,time){
+  $('modalRoot').innerHTML=`<div class="modal img" onclick="closeModal()"><div class="card"><div class="loading">جاري تحميل الصورة (${esc(time)})...</div></div></div>`;
+  try{
+    const src=await call('shot',{fileId:id});
+    const c=$('modalRoot').querySelector('.card'); if(c) c.innerHTML=`<img src="${src}" alt=""><div class="muted" style="padding:8px 4px">${esc(time)} · دوس في أي حتة للقفل</div>`;
+  }catch(e){ closeModal(); toast(e.message); }
+}
+function closeModal(){ if(!$('modalRoot').querySelector('.alarm')) $('modalRoot').innerHTML=''; }
+
+/* ============ الموظفين ============ */
+async function viewUsers(){
+  $('main').innerHTML='<div class="loading">جاري التحميل...</div>';
+  try{
+    usersCache=await call('users');
+    const U=usersCache;
+    $('main').innerHTML=`
+    <div class="row" style="margin-bottom:14px;align-items:center"><h2 style="margin:0">الموظفين</h2><div class="spacer"></div><button class="btn" onclick="editUser()">+ موظف جديد</button></div>
+    <div class="tbl-wrap"><table>
+      <tr><th>الاسم</th><th>اليوزر</th><th>الدور</th><th>الوظيفة</th><th>بيبصم</th><th>الحالة</th><th>آخر دخول</th><th></th></tr>
+      ${U.map(u=>{ const lock=S.user.role==='hr'&&u.role==='admin'; return `<tr>
+        <td><b>${esc(u.name)}</b></td><td dir="ltr" style="text-align:right">${esc(u.username)}</td><td>${esc(u.roleName)}</td><td class="muted">${esc(u.job)}</td>
+        <td>${u.clocks?'✓':'—'}</td><td>${u.active?'<span class="pill p-in">نشط</span>':'<span class="pill p-out">موقوف</span>'}</td>
+        <td class="muted">${esc(u.lastLogin)||'—'}</td>
+        <td>${lock?'':`<button class="btn ghost small" onclick="editUser('${esc(u.username)}')">تعديل</button> <button class="btn ghost small" onclick="resetPw('${esc(u.username)}','${esc(u.name)}')">باسورد جديد</button>`}</td></tr>`; }).join('')}
+    </table></div>`;
+  }catch(e){ $('main').innerHTML=`<div class="card err">${esc(e.message)}</div>`; }
+}
+function editUser(un){
+  const u=un? usersCache.find(x=>x.username===un) : {username:'',name:'',role:'team',job:'',clocks:true,active:true};
+  const roles=[['team','فريق'],['am','أكونت مانجر'],['hr','HR']].concat(S.user.role==='admin'?[['admin','أدمن']]:[]);
+  $('modalRoot').innerHTML=`<div class="modal"><div class="card">
+    <h2>${un?'تعديل موظف':'موظف جديد'}</h2>
+    <label>الاسم</label><input id="fN" value="${esc(u.name)}">
+    <label>اليوزر (إنجليزي)</label><input id="fU" dir="ltr" value="${esc(u.username)}" ${un?'disabled':''} placeholder="مثلاً: ahmed.ali">
+    <label>الدور</label><select id="fR">${roles.map(r=>`<option value="${r[0]}" ${u.role===r[0]?'selected':''}>${r[1]}</option>`).join('')}</select>
+    <label>الوظيفة</label><input id="fJ" value="${esc(u.job)}" placeholder="مثلاً: Designer">
+    <div class="check"><input type="checkbox" id="fC" ${u.clocks?'checked':''}><span>بيبصم حضور وانصراف</span></div>
+    ${un?`<div class="check"><input type="checkbox" id="fA" ${u.active?'checked':''}><span>الحساب نشط</span></div>`:''}
+    <div class="err" id="fE"></div>
+    <div class="mfoot"><button class="btn" id="fS">حفظ</button><button class="btn ghost" onclick="closeModal()">إلغاء</button></div>
+  </div></div>`;
+  $('fS').onclick=async()=>{
+    $('fE').textContent=''; $('fS').disabled=true;
+    try{
+      const r=await call('saveUser',{isNew:!un,user:{username:$('fU').value,name:$('fN').value,role:$('fR').value,job:$('fJ').value,clocks:$('fC').checked,active:un?$('fA').checked:true}});
+      if(r.password) showPw($('fN').value,$('fU').value.trim().toLowerCase(),r.password); else { closeModal(); toast('اتحفظ ✓'); }
+      usersCache=null; if(S.view==='users') viewUsers();
+    }catch(e){ $('fE').textContent=e.message; $('fS').disabled=false; }
+  };
+}
+async function resetPw(un,name){
+  if(!confirm('هتعمل باسورد جديد لـ '+name+'؟ الباسورد القديم هيبطل يشتغل.')) return;
+  try{ const r=await call('resetPassword',{username:un}); showPw(name,un,r.password); }catch(e){ toast(e.message); }
+}
+function showPw(name,un,pw){
+  $('modalRoot').innerHTML=`<div class="modal"><div class="card">
+    <h2>بيانات دخول ${esc(name)}</h2>
+    <p class="muted">ابعتهاله. الباسورد ده مش هيظهر تاني، وهو يقدر يغيّره من زرار "الباسورد".</p>
+    <label>اليوزر</label><div class="pw">${esc(un)}</div>
+    <label>الباسورد</label><div class="pw">${esc(pw)}</div>
+    <div class="mfoot"><button class="btn" id="cpy">نسخ</button><button class="btn ghost" onclick="closeModal()">تمام</button></div>
+  </div></div>`;
+  $('cpy').onclick=()=>{ const t='اليوزر: '+un+'\nالباسورد: '+pw; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('اتنسخ ✓')).catch(()=>toast('انسخه يدوي')); };
+}
+
+/* ============ تغيير الباسورد ============ */
+function openPw(){
+  $('modalRoot').innerHTML=`<div class="modal"><div class="card">
+    <h2>تغيير الباسورد</h2>
+    <label>الباسورد الحالي</label><input type="password" id="p1" dir="ltr">
+    <label>الباسورد الجديد (6 على الأقل)</label><input type="password" id="p2" dir="ltr">
+    <div class="err" id="pE"></div>
+    <div class="mfoot"><button class="btn" id="pS">حفظ</button><button class="btn ghost" onclick="closeModal()">إلغاء</button></div>
+  </div></div>`;
+  $('pS').onclick=async()=>{
+    try{ await call('changePassword',{oldPassword:$('p1').value,newPassword:$('p2').value}); closeModal(); toast('الباسورد اتغير ✓'); }
+    catch(e){ $('pE').textContent=e.message; }
+  };
+}
+
+/* ============ تشغيل ============ */
+S.token=load('erp_token');
+if(S.token) boot(); else { $('boot').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+</script>
+</body>
+</html>
