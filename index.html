@@ -1,20 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#123F3A" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1311" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Miqnas">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <title>Miqnas ERP</title>
-<style>body{margin:0;font-family:system-ui,sans-serif;background:#F3F7F6;color:#56706B;display:grid;place-items:center;min-height:100vh}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600&display=swap" rel="stylesheet">
+<script>
+/* النايت مود: بيتحدد قبل ما الصفحة ترسم عشان مايحصلش وميض أبيض. أول مرة بيمشي على إعداد الجهاز */
+(function(){ var t=null; try{ t=localStorage.getItem('mq_theme'); }catch(e){}
+  if(t!=='dark'&&t!=='light') t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t); })();
+</script>
+<style>#ld{position:fixed;inset:0;display:grid;place-items:center;font-family:system-ui,sans-serif;color:#56706B;background:#F3F6F5}
+html[data-theme="dark"] #ld{background:#0B1311;color:#9DB0AA}</style>
 </head>
 <body>
 <div id="ld">Loading...</div>
+<div id="loginView" class="login-wrap hidden">
+  <form class="login" id="loginForm">
+    <div class="logo"><i>M</i>Miqnas <span>ERP</span></div>
+    <p>Sign in with your username and password</p>
+    <label for="lu">Username</label>
+    <input id="lu" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="lp">Password</label>
+    <input id="lp" type="password" autocomplete="current-password" required>
+    <button class="btn primary full" id="lbtn">Sign in</button>
+    <div class="err" id="lerr"></div>
+  </form>
+</div>
+
+<div id="appView" class="hidden">
+  <div id="sideShade" onclick="sideOpen(false)"></div>
+  <aside id="side">
+    <div class="logo"><i>M</i>Miqnas <span>ERP</span></div>
+    <nav id="nav" aria-label="Main"></nav>
+    <div class="spacer"></div>
+    <button class="sclock hidden" id="sClock" onclick="go('clock')"></button>
+    <div class="suser" id="sUser"></div>
+  </aside>
+  <div id="shell">
+    <header id="top">
+      <button id="menuBtn" type="button" aria-label="Menu" aria-controls="side" aria-expanded="false" onclick="sideOpen(true)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="ttl"><h1 id="pgTitle"></h1><div id="pgSub"></div></div>
+      <div class="spacer"></div>
+      <div id="topActions"></div>
+      <button id="themeBtn" type="button" onclick="themeToggle()"></button>
+      <button id="bell" type="button" aria-label="Notifications"></button>
+      <div id="bellPanel" class="hidden"></div>
+    </header>
+    <main id="main"></main>
+  </div>
+</div>
+
+<video id="cap" muted playsinline></video>
+<div id="modalRoot"></div>
+
+
 <script>
-// بيجيب آخر نسخة من السيستم في كل مرة، من غير كاش
-fetch('app.html?v=' + Date.now(), { cache: 'no-store' })
-  .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
-  .then(function (html) { document.open(); document.write(html); document.close(); })
-  .catch(function () { document.getElementById('ld').textContent = 'مشكلة في التحميل. اعمل ريفريش.'; });
+/* ============ تحميل ملفات السيستم ============
+   الترتيب مهم: core الأول، بعدها الموديولات، وآخر حاجة start.js.
+   version.json بيتقرا من غير كاش، فأول ما رقم النسخة يتغير كل الملفات بتتحمّل جديدة.
+   قايمة الملفات نفسها جوه version.json، فلو الصفحة دي متخزنة قديمة في المتصفح الملفات الجديدة برضه بتتحمّل. */
+(function () {
+  var CSS = ["core/styles.css", "modules/briefs/briefs.css", "core/dark.css"];
+  var JS = [ "core/config.js", "core/time12.js", "core/api.js", "core/queue.js", "core/auth.js", "core/shell.js", "core/popup.js", "core/avatars.js", "core/picker.js", "modules/dashboard/dashboard.js", "modules/attendance/clock.js", "modules/attendance/reports.js", "modules/attendance/locations.js", "modules/people/employees.js", "modules/people/devices.js", "modules/people/peopledash.js", "modules/settings/settings.js", "modules/settings/health.js", "modules/blockers/blockers.js", "modules/projects/projects.js", "modules/org/org.js", "modules/briefs/briefs.js", "modules/desk/desk.js", "modules/tasks/tasks.js", "modules/meetings/meetings.js", "modules/requests/requests.js", "modules/exec/exec.js", "modules/crm/crm.js", "modules/clients/report.js", "modules/soon/soon.js", "core/start.js" ];
+  function fail() { var d = document.getElementById('ld'); if (d) d.textContent = 'مشكلة في التحميل. اعمل ريفريش.'; }
+  fetch('version.json?ts=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .catch(function () { return { v: String(Date.now()) }; })
+    .then(function (m) {
+      var v = encodeURIComponent(m.v);
+      if (m.js && m.js.length) JS = m.js;
+      if (m.css && m.css.length) CSS = m.css;
+      CSS.forEach(function (href) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href + '?v=' + v; document.head.appendChild(l); });
+      JS.forEach(function (src) { var s = document.createElement('script'); s.src = src + '?v=' + v; s.async = false; s.onerror = fail; document.body.appendChild(s); });
+    });
+})();
 </script>
 </body>
 </html>
