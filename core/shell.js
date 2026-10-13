@@ -207,7 +207,7 @@ function startPrefetchLoop(){
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && S.token && S.user) prefetch(); });
 
 /* ============ مؤقت واحد لكل العدادات ============ */
-function setStatus(st){ if(st) st._off=Date.now()-(st.serverNow||Date.now()); S.status=st; }
+function setStatus(st){ if(st) st._off=Date.now()-(st.serverNow||Date.now()); S.status=st; if(st && !st.clockedIn) store('co_snz',null); if(typeof coTick==='function') setTimeout(coTick,0); }
 function fmtDur(ms){ ms=Math.max(0,ms); const h=Math.floor(ms/36e5), m=Math.floor(ms%36e5/6e4), s=Math.floor(ms%6e4/1e3); return [h,m,s].map(x=>String(x).padStart(2,'0')).join(':'); }
 function tickAll(){
   const now=Date.now();
@@ -302,6 +302,7 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); pwaPro
 if ('serviceWorker' in navigator && location.protocol === 'https:') { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }); }
 function pwaWho(){ return S.user && (can('system.admin') || (can('projects.manage_own') && !can('projects.manage_all'))); }
 function pwaBanner(){
+  if(VA_TAB) return;
   const el = $('pwaBar'); if (el) el.remove();
   if (!S.user || !pwaWho() || isStandalone() || !isPhone() || load('pwa_hide') === '1') return;
   const ios = /iPhone|iPad/i.test(navigator.userAgent);
