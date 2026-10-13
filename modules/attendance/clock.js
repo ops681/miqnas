@@ -85,6 +85,7 @@ async function onShareEnded(){
   showAlarm(false);
 }
 function showAlarm(afterReload){
+  if(VA_TAB) return; // View as: مفيش مشاركة شاشة
   if(!S.status||!S.status.clockedIn) return;
   if(S.status.onBreak) return; // وقت البريك مش لازم مشاركة
   if(afterReload && !S.reloadLogged){ S.reloadLogged=true; callOrQueue('shareEvent',{event:'stopped'}).catch(()=>{}); }
@@ -141,6 +142,7 @@ async function breakEnd(){
   }catch(e){ alert(e.message); if(b){ b.disabled=false; b.textContent='Resume Work'; } }
 }
 async function clockIn(){
+  coAsk();
   const b=$('inBtn'); b.disabled=true; b.textContent='Choose what to share...';
   try{
     const mode=await startShare();
@@ -232,7 +234,7 @@ function getLoc(strict){
 S.lastLoc=Number(load('erp_lastloc'))||0;
 setInterval(async()=>{
   const st=S.status;
-  if(!S.token||!S.user||!S.user.clocks||!S.cfg.locationOn||!st||!st.clockedIn) return;
+  if(VA_TAB||!S.token||!S.user||!S.user.clocks||!S.cfg.locationOn||!st||!st.clockedIn) return;
   const gap=(S.cfg.locMin||30)*60000;
   if(Date.now()-S.lastLoc < gap) return;
   S.lastLoc=Date.now(); store('erp_lastloc',String(S.lastLoc));
