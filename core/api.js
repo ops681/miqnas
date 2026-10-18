@@ -1,5 +1,12 @@
 /* ============ الاتصال بالسيرفر ============ */
-function call(action, params){
+// الصلاحيات محفوظة جوه الـ closure ده: بتتغير من رد السيرفر على login / me بس.
+// تعديل S.user.perms أو الـ localStorage من الـ Console مابيفتحش حاجة. (والسيرفر برضه بيرفض ويسجل المحاولة)
+const { call, can, canAny, permSeed, srvFlag } = (() => {
+let P = null, F = null;
+const take = (action, d) => { if ((action === 'me' || action === 'login' || action === 'firstSetup') && d && d.user && Array.isArray(d.user.perms)) { P = new Set(d.user.perms.map(String)); F = Object.freeze({ founder: !!d.user.founder, clevel: !!d.user.clevel, ceo: !!d.user.ceo, teamAct: !!(d.teamAct || d.user.teamAct), lines: Object.freeze([].concat(d.user.lines || []).map(String)) }); } return d; };
+const has = p => !!(P && P.has(p));
+function call(action, params){ return call0(action, params).then(d => take(action, d)); }
+function call0(action, params){
   params = Object.assign({}, params||{}, {token:S.token, dev:deviceId()});
   const done = r => {
     if(r && r.ok) return r.data;
@@ -35,6 +42,12 @@ function call(action, params){
       throw e.message? e : new Error('مشكلة في الاتصال');
     });
 }
+// أول فتح من البيانات المتخزنة (للسرعة) لحد ما رد السيرفر ييجي. بتشتغل مرة واحدة بس
+const permSeed = u => { if (P) return; u = u || {}; P = new Set((Array.isArray(u.perms) ? u.perms : []).map(String)); F = Object.freeze({ founder: !!u.founder, clevel: !!u.clevel, ceo: !!u.ceo, teamAct: !!u.teamAct, lines: Object.freeze([].concat(u.lines || []).map(String)) }); };
+// founder / clevel / ceo / teamAct / lines من رد السيرفر (مش من S.user اللي ممكن يتعدل)
+const srvFlag = k => F ? F[k] : undefined;
+return Object.freeze({ call, can: has, canAny: list => list.some(has), permSeed, srvFlag });
+})();
 function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),msg.length>40?6000:3200); }
 window.erpCall = call;
 window.erpToast = toast;
