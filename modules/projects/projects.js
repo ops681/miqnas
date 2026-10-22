@@ -74,12 +74,13 @@ function renderProject(r,keep){
   setTop(r.client, r.id+' · '+r.type);
   S.proj=r;
   {
-    const backTo = S.view==='mytasks' ? ['viewMyTasks()','My Tasks'] : ['viewProjects()','All Projects'];
+    const backTo = r.guest ? ["go('tasks')",'Tasks'] : S.view==='mytasks' ? ['viewMyTasks()','My Tasks'] : ['viewProjects()','All Projects'];
     const groups=ROLE_ORDER.map(role=>({role, tasks:r.tasks.filter(t=>t.role===role)})).filter(g=>g.tasks.length && (r.type!==CP_TYPE || g.tasks.some(t=>!t.na)));
     const links=r.tasks.filter(t=>t.link);
     const D=r.data;
-    $('main').innerHTML=`<div class="en">
+    $('main').innerHTML=`<div class="en${r.guest?' pguest':''}">
     <button class="btn ghost small" onclick="${backTo[0]}">← ${backTo[1]}</button>
+    ${r.guest?`<div class="notice" style="margin:10px 0" dir="rtl">👀 انت فاتح المشروع ده للقراءة بس، عشان عليك تاسك جانبي فيه. أول ما التاسك تخلص المشروع هيتقفل عندك.</div>`:''}
     ${r.contract&&r.contract.status!=='signed'&&r.status==='Active'?`<div class="notice" style="margin:10px 0">${r.contract.status==='none'?'No contract on this project yet.':'The contract is not signed yet ('+esc(r.contract.status)+').'}${typeof canFinance==='function'&&can('finance.manage')||S.user.founder?` <button class="btn ghost small" onclick="${r.contract.id?`go('finance',{id:'${esc(r.contract.id)}'})`:`go('finance')`}">Open in Finance →</button>`:''}</div>`:''}
     <div class="card phead">
       <div class="row" style="align-items:center;gap:10px">${r.canEdit?`<button type="button" class="pi-btn" title="Change icon" aria-label="Change project icon" onclick="piEdit('${esc(r.id)}','${esc(r.client).replace(/'/g,'')}')">${piTag(r.id,r.client,'pi-lg')}</button>`:piTag(r.id,r.client,'pi-lg')}<h2 style="margin:0">${esc(r.client)}</h2><span class="pill p-out">${esc(r.id)}</span><span class="pill ${PSTAT[r.status]||'p-out'}">${esc(r.status)}</span>${r.blockers&&r.blockers.length?blBadge({open:r.blockers.filter(b=>b.status!=='Resolved').length,total:r.blockers.length,days:r.blockers.reduce((s,b)=>s+b.days,0)}):''}<div class="spacer"></div>
@@ -108,14 +109,15 @@ function renderProject(r,keep){
     <div id="pntBox">${projNotesHTML(r)}</div>
     ${projAccessHTML(r)}
     ${projBlockersHTML(r)}
-    ${D.partner||r.canEdit||(r.clientPortal&&r.clientPortal.on)?`<div id="pnBox">${pnHTML(r,S.pn&&S.pn[r.id])}</div>`:''}
+    ${sideTasksHTML(r)}
+    ${!r.guest&&(D.partner||r.canEdit||(r.clientPortal&&r.clientPortal.on))?`<div id="pnBox">${pnHTML(r,S.pn&&S.pn[r.id])}</div>`:''}
     ${links.length?`<div class="card" style="margin-top:14px"><h3>Deliverables</h3><div class="links">${links.map(t=>oneUrl(t.link)?`<a href="${esc(t.link)}" target="_blank" rel="noopener" class="lnk"><b>${esc(t.linkLabel||t.title)}</b><span>${bd(t.assigneeName)}</span></a>`:`<div class="lnk lnk-t"><b>${esc(t.linkLabel||t.title)}</b><span>${bd(t.assigneeName)}</span><p dir="auto">${txtLinks(t.link)}</p></div>`).join('')}</div></div>`:''}
     ${groups.map(g=>{ const a=g.tasks.find(t=>t.assigneeName); const live=g.tasks.filter(t=>!t.na); const dn=live.filter(t=>t.status==='Done').length;
       return `<div class="card tgroup"><div class="tghead"><h3 style="margin:0">${ROLE_T[g.role]}</h3><span class="muted">${esc(a?a.assigneeName:'Unassigned')}</span><div class="spacer"></div><span class="muted" style="font-size:13px">${live.length?dn+'/'+live.length:'Not in scope'}</span></div>
       ${g.tasks.map(t=>taskRowHTML(t,r.id,r.me,r.isAdmin,r.canEdit)).join('')}</div>`; }).join('')}</div>`;
     if(keep) window.scrollTo(0,y);
     startTicks();
-    if(D.partner||r.canEdit) pnLoad(r);
+    if(!r.guest&&(D.partner||r.canEdit)) pnLoad(r);
   }
 }
 
@@ -157,12 +159,12 @@ function taskRowHTML(t,pid,me,isAdmin,canEdit){
   const nk=pid+'|'+t.key, nOpen=S.openNotes.has(nk), nid='nt_'+(pid+'_'+t.key).replace(/[^a-z0-9_]/gi,'_');
   const notes = `<button class="tnbtn" onclick="toggleNotes('${esc(nk)}')">${nOpen?'▾':'▸'} Revisions${t.notes.length?' ('+t.notes.length+')':''}</button>`+
     (nOpen?`<div class="tnotes">${t.notes.length?t.notes.map(n=>`<div class="tnote"><span>${bd(n.by)} · ${new Date(n.at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span><div class="tn-t">${bdl(n.text)}</div></div>`).join(''):'<div class="muted" style="font-size:12.5px">No revisions yet.</div>'}
-      <div class="tnadd"><input id="${nid}" dir="auto" maxlength="1000" placeholder="اكتب التعديل المطلوب أو اللي اتعمل"><button class="tb ghost" onclick="addNote(${P},'${nid}')">Add</button></div></div>`:'');
+      <div class="tnadd"><textarea id="${nid}" dir="auto" maxlength="1000" placeholder="اكتب التعديل المطلوب أو اللي اتعمل" rows="1" class="ml"></textarea><button class="tb ghost" onclick="addNote(${P},'${nid}')">Add</button></div></div>`:'');
   // Notes عادية تحت الـ Revisions (أي ملاحظة، مش تعديل مطلوب)
   const tk='n|'+nk, tOpen=S.openNotes.has(tk), tid='tn_'+(pid+'_'+t.key).replace(/[^a-z0-9_]/gi,'_'), TN=t.tnotes||[];
   const tnotes = `<button class="tnbtn" onclick="toggleNotes('${esc(tk)}')">${tOpen?'▾':'▸'} Notes${TN.length?' ('+TN.length+')':''}</button>`+
     (tOpen?`<div class="tnotes tn-n">${TN.length?TN.map(n=>`<div class="tnote"><span>${bd(n.by)} · ${new Date(n.at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}${(n.u===me||isAdmin)?` <button type="button" class="tn-del" title="Delete" onclick="tAct(${P},'tnotedel',{id:'${esc(n.id)}'})">✕</button>`:''}</span><div class="tn-t">${bdl(n.text)}</div></div>`).join(''):'<div class="muted" style="font-size:12.5px">No notes yet.</div>'}
-      <div class="tnadd"><input id="${tid}" dir="auto" maxlength="1000" placeholder="اكتب نوت" onkeydown="if(event.key==='Enter'){event.preventDefault();addTNote(${P},'${tid}');}"><button class="tb ghost" onclick="addTNote(${P},'${tid}')">Add</button></div></div>`:'');
+      <div class="tnadd"><textarea id="${tid}" dir="auto" maxlength="1000" placeholder="اكتب نوت" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();addTNote(${P},'${tid}');}" rows="1" class="ml"></textarea><button class="tb ghost" onclick="addTNote(${P},'${tid}')">Add</button></div></div>`:'');
   const wl=t.waiting.slice(0,3).map(w=>esc(w.title)+(w.name?' ('+bd(w.name)+')':'')).join(', ')+(t.waiting.length>3?` +${t.waiting.length-3} more`:'');
   const wait = t.locked ? `<div class="twait">Waiting for: ${wl}</div>` : '';
   const P2=`'${esc(pid)}','${esc(t.key)}'`;
@@ -179,6 +181,20 @@ function taskRowHTML(t,pid,me,isAdmin,canEdit){
   return `<div class="trow${withOther?' other':''}${t.locked?' locked':''}${t.running||(meH&&meH.since)?' running':''}${t.status==='Done'?' done':''}">
     <div class="tmain"><div class="tt">${esc(t.title)}${howTo}</div>${who}${helpersLine}${wait}${refs}${link}${notes}${tnotes}</div>
     <div class="tside">${lock}${dl}${status}<span class="tsep"></span>${time}${timer}</div></div>`;
+}
+
+/* ----- التاسكات الجانبية المربوطة بالمشروع (من صفحة Tasks) ----- */
+function sideTasksHTML(r){
+  const L=r.sideTasks||[], can=!r.guest;
+  if(!L.length && !can) return '';
+  const open=L.filter(t=>t.status!=='Done'&&t.status!=='Cancelled'), closed=L.length-open.length;
+  const row=t=>{ const meta=[esc(t.ownerName)]; if(t.due) meta.push(`<span style="color:${t.late?'var(--bad)':'inherit'}">${t.late?'Late · ':'Due '}${fmtDay(t.due)}</span>`);
+    const inner=`<span title="${esc(t.priority)}" style="flex:none;width:10px;height:10px;border-radius:3px;margin-top:6px;background:${(typeof PRIO_COL!=='undefined'&&PRIO_COL[t.priority])||'var(--blue)'}"></span>
+      <span class="tx"><b style="${t.status==='Done'||t.status==='Cancelled'?'text-decoration:line-through;color:var(--muted)':''}">${bd(t.title)}</b><span>${meta.join(' · ')}${t.mine?' · <b style="color:var(--brand2)">عليك</b>':''}</span></span>
+      <span class="pill ${(typeof GT_PILL!=='undefined'&&GT_PILL[t.status])||''}">${esc(t.status)}</span>`;
+    return t.canOpen?`<button class="al" onclick="go('tasks',{id:'${esc(t.id)}'})">${inner}</button>`:`<div class="al">${inner}</div>`; };
+  return `<div class="card flush" style="margin-top:14px"><div class="chead"><h3 style="margin:0">📌 Side tasks <span class="muted" style="font-weight:500;font-size:13px">· ${open.length} open${closed?' · '+closed+' finished':''}</span></h3><div class="spacer"></div>${can?`<button class="btn ghost small" onclick="gtEdit('',{project:'${esc(r.id)}'})">+ Side task</button>`:''}</div>
+    ${L.length?L.map(row).join(''):'<div class="empty" style="padding:14px 18px" dir="rtl">مفيش تاسكات جانبية على المشروع ده. أي شغل زيادة برا تاسكات المشروع، اعمله تاسك جانبي من هنا.</div>'}</div>`;
 }
 
 S.openNotes=new Set();
@@ -527,7 +543,7 @@ function pnHTML(r,list){
   const D=r.data||{}, hasP=!!D.partner;
   const who=hasP?`${esc(r.partnerName||'the partner')} and/or the client`:'the client';
   return `<div class="card" style="margin-top:14px"><div class="row" style="align-items:center;gap:8px"><h3 style="margin:0">Updates <span class="muted" style="font-weight:500;font-size:13px">· shown to ${who} in their portal</span></h3></div>
-    ${r.canEdit?`<div class="pn-form"><textarea id="pnT" rows="2" placeholder="اكتب تحديث… (مثلاً: تم إرسال التصميم للمراجعة)" dir="auto"></textarea><input id="pnN" placeholder="الخطوة الجاية (اختياري)" dir="auto">
+    ${r.canEdit?`<div class="pn-form"><textarea id="pnT" rows="2" placeholder="اكتب تحديث… (مثلاً: تم إرسال التصميم للمراجعة)" dir="auto"></textarea><textarea id="pnN" placeholder="الخطوة الجاية (اختياري)" dir="auto" rows="1" class="ml"></textarea>
       <select id="pnTo" aria-label="Who sees it">${(hasP?['partner','client','both']:['client']).map(k=>`<option value="${k}">${PN_TO[k]}</option>`).join('')}</select><button class="btn primary" onclick="pnAdd('${esc(r.id)}')">Post update</button></div>`:''}
     ${list===undefined?'<div class="muted" style="padding:8px 0">Loading...</div>':list.length?list.map(n=>`<div class="pn-row"><div class="pn-h"><b>${bd(n.by)}</b><span class="pill p-out" style="font-size:11px">${PN_TO[n.to]||'Partner'}</span><span class="muted">${new Date(n.at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})}</span>${n.mine||can('projects.manage_all')?`<button class="btn ghost small" onclick="pnDel('${esc(n.id)}','${esc(r.id)}')">Delete</button>`:''}</div><div  style="white-space:normal">${bdl(n.text)}</div>${n.next?`<div class="muted" dir="rtl" style="font-size:13px">الخطوة الجاية: ${bd(n.next)}</div>`:''}</div>`).join(''):'<div class="muted" style="padding:8px 0;font-size:13.5px">No updates yet. Stage changes and blockers already show in the portals automatically.</div>'}</div>`;
 }
