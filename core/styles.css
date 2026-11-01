@@ -876,3 +876,4 @@ textarea.ml{field-sizing:content;min-height:42px;max-height:260px;resize:vertica
 .tblk{font-size:13px;margin:6px 0;padding:8px 10px;border-radius:8px;border:1px solid var(--bad);background:rgba(217,45,32,.06);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .tblk .tblk-b{display:inline-flex;gap:4px;margin-inline-start:auto}
 .trow.blocked{box-shadow:inset 3px 0 0 var(--bad)}
+.zs-pam{display:flex;flex-wrap:wrap;gap:6px 16px}
