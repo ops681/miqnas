@@ -877,3 +877,4 @@ textarea.ml{field-sizing:content;min-height:42px;max-height:260px;resize:vertica
 .tblk .tblk-b{display:inline-flex;gap:4px;margin-inline-start:auto}
 .trow.blocked{box-shadow:inset 3px 0 0 var(--bad)}
 .zs-pam{display:flex;flex-wrap:wrap;gap:6px 16px}
+.pw-list{display:flex;flex-direction:column;gap:6px}.pw-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line2);border-radius:8px}.pw-row .tx{flex:1;min-width:0;display:flex;flex-direction:column}.pw-row .tx span{font-size:12.5px}
