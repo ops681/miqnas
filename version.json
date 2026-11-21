@@ -1,9 +1,10 @@
 {
- "v":"2026-11-19.1",
+ "v": "2026-11-21.6",
  "css": [
   "core/styles.css",
   "modules/briefs/briefs.css",
-  "core/dark.css"
+  "core/dark.css",
+  "core/look.css"
  ],
  "js": [
   "core/config.js",
@@ -12,6 +13,8 @@
   "core/queue.js",
   "core/auth.js",
   "core/shell.js",
+  "core/look.js",
+  "core/xlsx.js",
   "core/popup.js",
   "core/avatars.js",
   "core/brand.js",
@@ -48,6 +51,8 @@
   "modules/finance/finance.js",
   "modules/board/board.js",
   "modules/soon/soon.js",
+  "modules/kpi/kpi.js",
+  "modules/people/hrleave.js",
   "core/start.js"
  ]
 }
